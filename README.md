@@ -4,6 +4,11 @@ A local tracker for an internship hunt. You set a daily floor of applications an
 streak going, earn points, and spend them on rewards you pick yourself. Milestones keep the bigger tasks moving.
 Everything runs on your own computer, and your data never leaves it.
 
+## AI disclosure
+
+This project was vibecoded with Claude Code, Anthropic's AI coding agent, and Claude Code wrote the code. I
+directed it: what to build, how the rules work, and what to change after using it.
+
 ## Run it
 
 You need Python 3.8 or newer. It uses only the standard library, so there's nothing to install.
@@ -94,6 +99,6 @@ the 21:00 one stays on screen.
   rebinding. Saves must be JSON from the page's own origin, and a stale tab can't overwrite newer data (it gets
   the latest copy back instead).
 
-## Credits
+## License
 
-Built with AI help (Claude Code). MIT license.
+MIT.
