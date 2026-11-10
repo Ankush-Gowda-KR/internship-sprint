@@ -1,0 +1,1008 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Internship Sprint</title>
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Big+Shoulders+Display:wght@700;800&display=swap">
+<style>
+/* Layout: one column. Scoreboard strip, then Today as the single emphasized block, then plain sections split by rules. */
+:root{
+  --bg:#F3F5F9; --surface:#FFFFFF; --ink:#121621; --muted:#586174; --line:#D8DDE7;
+  --accent:#2246D4; --accent-ink:#FFFFFF; --accent-soft:#E4E9FC;
+  --good:#0B7C55; --good-soft:#DDF2E8; --warn:#965800; --warn-soft:#F9EDD6; --bad:#B5302A; --bad-soft:#F9E2E0;
+  --fire:#C2410C; --fire-ink:#FFFFFF; --ice:#1D6FB8; --ice-soft:#DCEBFA;
+  --legend:#6D3FD6; --legend-ink:#FFFFFF; --legend-soft:#EEE7FD;
+  --display:"Big Shoulders Display","Ubuntu Condensed","Arial Narrow","Roboto Condensed",sans-serif;
+  --body:"Atkinson Hyperlegible","Ubuntu",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0C0F15; --surface:#151A24; --ink:#E7EAF2; --muted:#959FB2; --line:#283040;
+    --accent:#7591FF; --accent-ink:#0C0F15; --accent-soft:#1B2547;
+    --good:#45C991; --good-soft:#11291F; --warn:#EBA845; --warn-soft:#2B2112; --bad:#FF776B; --bad-soft:#341816;
+    --fire:#FB923C; --fire-ink:#0C0F15; --ice:#7CC4FA; --ice-soft:#10233A;
+    --legend:#B79CFF; --legend-ink:#0C0F15; --legend-soft:#231A3D;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:28px 16px 64px;display:grid;gap:32px}
+h1,h2{font-family:var(--display);font-weight:800;text-transform:uppercase;letter-spacing:.01em;line-height:1;margin:0;text-wrap:balance}
+h1{font-size:clamp(2.5rem,10vw,3.75rem)}
+h2{font-size:1.8rem}
+p{margin:0}
+a{color:var(--accent);font-weight:700}
+.eyebrow{font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.top{display:grid;gap:10px}
+.goal{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;background:var(--accent-soft);border-radius:12px;padding:10px 14px;font-weight:700}
+.goal .k{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.prize{font-size:.85rem;font-weight:700;color:var(--accent)}
+.list li.done .prize{color:var(--good)}
+.sub{color:var(--muted);max-width:62ch}
+.board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-top:6px}
+.stat{background:var(--surface);padding:10px 12px;display:grid;align-content:start;min-width:0}
+.stat .k{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.stat .v{font-family:var(--display);font-weight:800;font-size:2.2rem;line-height:1.05;font-variant-numeric:tabular-nums}
+.stat .n{font-size:.8rem;color:var(--muted)}
+@media (max-width:540px){.board{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.save{font-size:.85rem;color:var(--muted)}
+.save.bad{color:var(--bad);font-weight:700}
+
+.today{background:var(--surface);border:2px solid var(--ink);border-radius:16px;padding:16px;display:grid;gap:14px}
+.today.met{border-color:var(--good)}
+.today-head{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:8px;text-align:center}
+.nav{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:1.5rem;line-height:1;cursor:pointer}
+.nav:disabled{opacity:.3;cursor:default}
+.meta{color:var(--muted);font-size:.88rem}
+.rows{display:grid}
+[hidden]{display:none!important}
+.row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;padding:12px 0;border-top:1px solid var(--line)}
+.row:first-child{border-top:0;padding-top:0}
+.lbl{display:grid;flex:1 1 220px;min-width:0}
+.lbl span,.check .why{color:var(--muted);font-size:.88rem}
+.lbl .ptag,.check .ptag{display:inline-block;margin-left:8px;padding:1px 8px;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-size:.76rem;font-weight:700;vertical-align:2px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.count{font-family:var(--display);font-weight:800;font-size:2.1rem;line-height:1;font-variant-numeric:tabular-nums;min-width:3.4ch;text-align:center}
+.count small{font-size:1.15rem;color:var(--muted)}
+.row.ok .count{color:var(--good)}
+.stepper{display:flex;align-items:center;gap:8px}
+.stepper button{width:46px;height:46px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:1.5rem;font-weight:700;cursor:pointer}
+.stepper button.plus{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.stepper button:disabled{opacity:.4;cursor:default}
+.check{display:flex;gap:12px;align-items:flex-start;cursor:pointer;flex:1 1 240px;min-width:0}
+.check input{width:24px;height:24px;margin:2px 0 0;accent-color:var(--accent);flex:none}
+.check .txt{display:grid;min-width:0}
+.row.ok .check strong{color:var(--good)}
+#focusNote{flex:1 1 240px}
+.addapp{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr) auto;gap:8px;padding:0 0 4px}
+@media (max-width:600px){.addapp{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}#appCompany,#appSubmit{grid-column:1/-1}}
+.hint{font-size:.85rem;color:var(--warn);min-height:1.2em}
+input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-width:0}
+input:disabled,select:disabled{opacity:.55}
+.btn{font:inherit;font-weight:700;border-radius:10px;padding:10px 16px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;white-space:nowrap}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.danger{background:var(--bad-soft);border-color:transparent;color:var(--bad)}
+.btn.small{padding:6px 12px;font-size:.88rem}
+.btn:disabled{opacity:.4;cursor:default}
+.floorbar{height:12px;background:var(--bg);border:1px solid var(--line);border-radius:99px;overflow:hidden}
+.fill{height:100%;width:0;background:var(--accent);transition:width .3s ease}
+.today.met .fill{background:var(--good)}
+.floorline{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;align-items:baseline}
+.floormsg{font-weight:700}
+.today.met .floormsg{color:var(--good)}
+.daypts{font-family:var(--display);font-weight:800;font-size:1.3rem;font-variant-numeric:tabular-nums;color:var(--accent)}
+.nextms{font-size:.9rem;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px}
+.nextms strong{color:var(--ink)}
+
+section{display:grid;gap:12px}
+.cart{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:10px 0;display:grid;gap:8px;background:var(--surface)}
+.cart-h{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:4px 12px}
+.cart ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.cart li{display:flex;align-items:center;justify-content:space-between;gap:8px;overflow-wrap:anywhere}
+.cart-actions{display:flex;flex-wrap:wrap;gap:8px}
+.sec-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px 12px}
+.list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.list li{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.list .main{flex:1 1 200px;min-width:0;overflow-wrap:anywhere}
+.list select{width:auto}
+.list .empty{color:var(--muted)}
+.list li.done .t{color:var(--muted);text-decoration:line-through}
+.list li input[type=checkbox]{width:22px;height:22px;accent-color:var(--accent);flex:none}
+.list li.editing input{flex:1 1 140px;width:auto}
+.muted{color:var(--muted)}
+.chip{display:inline-block;font-size:.76rem;font-weight:700;padding:3px 9px;border-radius:99px;background:var(--bg);border:1px solid var(--line);color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.chip.good{background:var(--good-soft);color:var(--good);border-color:transparent}
+.chip.warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.chip.bad{background:var(--bad-soft);color:var(--bad);border-color:transparent}
+.chip.acc{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.pipe{display:flex;flex-wrap:wrap;gap:6px}
+.pts{font-family:var(--display);font-weight:800;font-size:1.3rem;font-variant-numeric:tabular-nums;min-width:3ch;text-align:right}
+.balance{color:var(--muted)}
+.balance b{font-family:var(--display);font-size:1.7rem;color:var(--ink);font-variant-numeric:tabular-nums}
+.linkbtn{background:none;border:0;padding:4px 0;color:var(--accent);font:inherit;font-weight:700;cursor:pointer;justify-self:start}
+.iconbtn{background:none;border:1px solid var(--line);border-radius:8px;color:var(--muted);font:inherit;font-size:.85rem;padding:6px 10px;cursor:pointer}
+.confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-weight:700}
+.rewardform{display:grid;grid-template-columns:minmax(0,1fr) 7rem auto;gap:8px}
+@media (max-width:480px){.rewardform{grid-template-columns:minmax(0,1fr) 6rem}.rewardform .btn{grid-column:1/-1}}
+details summary{cursor:pointer;color:var(--muted);font-weight:700}
+details ul{margin:8px 0 0;padding-left:1.2rem;color:var(--muted)}
+.ramp{margin:0;padding-left:1.4rem;display:grid;gap:6px}
+.note{color:var(--muted);font-size:.92rem;max-width:64ch}
+.where{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.92rem}
+.streak{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px 14px;align-items:center}
+.streak.lit{border-color:var(--fire)}
+.flame{font-size:2.9rem;line-height:1;filter:grayscale(1);opacity:.4;transition:filter .3s,opacity .3s}
+.streak.lit .flame{filter:none;opacity:1}
+.sinfo{display:grid;gap:2px;min-width:0}
+.snum{font-size:2.6rem;font-variant-numeric:tabular-nums}
+.streak.lit .snum{color:var(--fire)}
+.snum small{font-family:var(--body);font-size:.95rem;font-weight:700;text-transform:none;letter-spacing:0;color:var(--muted)}
+.smsg{font-size:.9rem;color:var(--muted)}
+.week7{grid-column:1/-1;list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.dot{display:grid;justify-items:center;gap:4px;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.dot i{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;border:2px solid var(--line);background:var(--bg);font-style:normal;font-size:1rem;font-weight:700;line-height:1}
+.dot.kept i{background:var(--fire);border-color:var(--fire);color:var(--fire-ink)}
+.dot.frozen i{background:var(--ice-soft);border-color:var(--ice);color:var(--ice)}
+.dot.future i{opacity:.45}
+.dot.now{color:var(--ink)}
+.dot.now.pending i{border-color:var(--fire);border-style:dashed}
+.sfoot{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;font-size:.88rem;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px}
+.sfoot b{color:var(--ink);font-variant-numeric:tabular-nums}
+#freezeBox{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-left:auto}
+.repair{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;background:var(--ice-soft);border-radius:10px;padding:10px 12px;font-size:.9rem;font-weight:700}
+/* Legendary card: the streak card's layout in purple, plus the timer. */
+.legend.lit{border-color:var(--legend)}
+.legend.lit .snum{color:var(--legend)}
+.legend .dot.kept i{background:var(--legend);border-color:var(--legend);color:var(--legend-ink)}
+.legend .dot.now.pending i{border-color:var(--legend)}
+.legend .btn.primary{background:var(--legend);border-color:var(--legend);color:var(--legend-ink)}
+.tbox{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;background:var(--legend-soft);border-radius:12px;padding:12px}
+.tbox input{flex:1 1 220px;width:auto;background:var(--surface)}
+.tbtns{display:flex;flex-wrap:wrap;gap:8px}
+.tclock{font-family:var(--display);font-weight:800;font-size:2.6rem;line-height:1;font-variant-numeric:tabular-nums;color:var(--legend)}
+.tbox.over{background:var(--bad-soft)}
+.tbox.over .tclock{color:var(--bad)}
+.tinfo{display:grid;flex:1 1 200px;min-width:0}
+.tinfo span,.thint{color:var(--muted);font-size:.88rem}
+.thint{flex-basis:100%}
+.timed{grid-column:1/-1;list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.timed li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:.92rem}
+.timed .main{flex:1 1 160px;min-width:0;overflow-wrap:anywhere}
+.tset{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px;margin-left:auto}
+.tset input{width:4.6rem;padding:4px 8px}
+.row.opt .lbl strong::after{content:" · optional this week";font-weight:400;font-size:.88rem;color:var(--muted)}
+.vh{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.cele{position:fixed;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:rgba(12,15,21,.6)}
+.cele-card{background:var(--surface);color:var(--ink);border-radius:20px;padding:28px 22px 20px;width:100%;max-width:360px;text-align:center;display:grid;gap:10px;justify-items:center;box-shadow:0 24px 64px rgba(0,0,0,.35);animation:rise .3s ease-out}
+.cele-icon{font-size:4.6rem;line-height:1;animation:pop .65s cubic-bezier(.2,1.6,.4,1)}
+.cele-h{font-size:2.6rem;color:var(--fire)}
+.cele-h.floor{color:var(--good)}
+.cele-h.legend{color:var(--legend)}
+.cele-txt{color:var(--muted);max-width:30ch}
+.cele-floor{font-weight:700;color:var(--good);background:var(--good-soft);border-radius:10px;padding:8px 12px}
+.cele-pts{font-weight:700}
+.cele .btn{width:100%;margin-top:6px;padding:12px 16px}
+@keyframes pop{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.18);opacity:1}100%{transform:scale(1)}}
+@keyframes rise{from{transform:translateY(18px);opacity:0}to{transform:none;opacity:1}}
+code{font-size:.88em}
+/* Top bar: sticky, slides away while you scroll down and comes back when you scroll up.
+   Pages: one per group of sections, picked by the hash (#/today, #/apps, ...). */
+.bar{position:sticky;top:0;z-index:30;background:var(--bg);border-bottom:1px solid var(--line);transition:transform .25s ease,opacity .25s ease,box-shadow .25s ease}
+.bar.scrolled{box-shadow:0 6px 20px rgba(0,0,0,.08)}
+.bar.hide{transform:translateY(-100%);opacity:0;pointer-events:none}
+.bar-in{max-width:960px;margin:0 auto;padding:8px 16px;display:flex;flex-wrap:nowrap;align-items:center;gap:6px 12px}
+.bstats{flex:none;display:flex;gap:12px;font-family:var(--display);font-weight:800;font-size:1.3rem;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--muted)}
+.bstats .lit-s{color:var(--fire)}
+.bstats .lit-l{color:var(--legend)}
+.tabs{display:flex;gap:2px;flex:1 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:10px;color:var(--muted);font-weight:700;font-size:.92rem;text-decoration:none;white-space:nowrap}
+.tab:hover{color:var(--ink);background:var(--surface)}
+.tab[aria-current="page"]{color:var(--accent);background:var(--accent-soft)}
+.tb{font-size:.72rem;padding:1px 7px;border-radius:99px;background:var(--surface);border:1px solid var(--line);color:var(--muted);font-variant-numeric:tabular-nums}
+.tb:empty{display:none}
+.tb.good{background:var(--good-soft);color:var(--good);border-color:transparent}
+.tb.bad{background:var(--bad-soft);color:var(--bad);border-color:transparent}
+.bar-end{flex:none;display:flex;align-items:center;gap:10px;margin-left:auto}
+.tchip{white-space:nowrap;font-family:var(--display);font-weight:800;font-size:1.15rem;line-height:1.2;color:var(--legend);background:var(--legend-soft);border-radius:99px;padding:3px 10px;text-decoration:none;font-variant-numeric:tabular-nums}
+.tchip.over{color:var(--bad);background:var(--bad-soft)}
+.bar .save{font-size:.8rem;white-space:nowrap}
+.saveerr{max-width:960px;margin:0 auto;padding:0 16px 8px;color:var(--bad);font-weight:700;font-size:.88rem}
+@media (max-width:600px){.bar-in{flex-wrap:wrap}.tabs{order:3;flex-basis:100%}}
+.page{display:grid;gap:32px}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<nav class="bar" id="bar" aria-label="Tracker pages">
+  <div class="bar-in">
+    <div class="bstats"><span id="bS">🔥 –</span><span id="bL">👑 –</span></div>
+    <div class="tabs">
+      <a class="tab" href="#/today" data-page="today">Today<span class="tb" id="tb-today"></span></a>
+      <a class="tab" href="#/apps" data-page="apps">Applications<span class="tb" id="tb-apps"></span></a>
+      <a class="tab" href="#/milestones" data-page="milestones">Milestones<span class="tb" id="tb-milestones"></span></a>
+      <a class="tab" href="#/rewards" data-page="rewards">Rewards<span class="tb" id="tb-rewards"></span></a>
+      <a class="tab" href="#/rules" data-page="rules">Rules</a>
+    </div>
+    <div class="bar-end">
+      <a class="tchip" id="bTimer" href="#/today" hidden><span aria-hidden="true">⏱ </span><span id="bClock">00:00</span><span class="vh"> on the timer</span></a>
+      <span class="save" id="save" role="status" aria-live="polite">Loading…</span>
+    </div>
+  </div>
+  <p class="saveerr" id="saveErr" role="alert" hidden></p>
+</nav>
+<div class="wrap">
+<div class="page" id="page-today">
+  <header class="top">
+    <div class="eyebrow" id="eyebrow">Internship sprint</div>
+    <h1 id="title">Offer by the deadline</h1>
+    <div class="goal" id="goal" hidden><span class="k">Big prize</span><span id="goalText"></span></div>
+    <p class="sub">Daily minimums, any time of day, any order. Hit the floor, bank points, spend them on rewards. Floor met on <span id="subWk">5</span> of 7 days is a good week. A DSA problem, a SQL problem and an application every day keep the streak alive.</p>
+    <div class="board">
+      <div class="stat"><span class="k">Day</span><span class="v" id="sDay">–</span><span class="n" id="sDayN">loading</span></div>
+      <div class="stat"><span class="k">Points</span><span class="v" id="sPts">–</span><span class="n">to spend</span></div>
+      <div class="stat"><span class="k">Floor days</span><span class="v" id="sWeek">–</span><span class="n">this week</span></div>
+      <div class="stat"><span class="k">Applied</span><span class="v" id="sApps">–</span><span class="n">total</span></div>
+    </div>
+  </header>
+
+  <section class="streak" id="streak" aria-labelledby="streakH">
+    <div class="flame" aria-hidden="true">🔥</div>
+    <div class="sinfo">
+      <h2 class="snum" id="streakH"><span id="sCur">–</span> <small>day streak</small></h2>
+      <p class="smsg" id="sMsg" aria-live="polite">Loading…</p>
+    </div>
+    <ol class="week7" id="week7" aria-label="Streak this week"></ol>
+    <div class="repair" id="repair" aria-live="polite" hidden></div>
+    <div class="sfoot">
+      <span>Best <b id="sBest">0</b></span>
+      <span>Freezes <b id="sHeld">0</b>/2</span>
+      <div id="freezeBox"></div>
+    </div>
+  </section>
+
+  <section class="streak legend" id="legend" aria-labelledby="legendH">
+    <div class="flame" aria-hidden="true">👑</div>
+    <div class="sinfo">
+      <h2 class="snum" id="legendH"><span id="lCur">–</span> <small>day legendary streak</small></h2>
+      <p class="smsg" id="lMsg" aria-live="polite">Loading…</p>
+    </div>
+    <ol class="week7" id="lWeek" aria-label="Legendary days this week"></ol>
+    <div class="tbox" id="tIdle">
+      <input id="tLabel" placeholder="What are you solving? (optional)" maxlength="60" aria-label="What you're solving">
+      <div class="tbtns">
+        <button class="btn primary" id="tStartDsa" type="button">Timed DSA</button>
+        <button class="btn" id="tStartSql" type="button">Timed SQL</button>
+      </div>
+      <p class="thint">One problem per timer, in one sitting. Done adds the +1 in Today for you, so don't press + as well.</p>
+    </div>
+    <div class="tbox" id="tRun" hidden>
+      <div class="tclock" id="tClock" role="timer">00:00</div>
+      <div class="tinfo"><strong id="tWhat"></strong><span id="tNote"></span></div>
+      <div class="tbtns" id="tBtns"></div>
+    </div>
+    <ul class="timed" id="timedList" aria-label="Timed problems today" hidden></ul>
+    <div class="sfoot">
+      <span>Best <b id="lBest">0</b></span>
+      <span>Freezes <b id="lHeld">2</b>/2</span>
+      <span class="tset">Timer: <label for="tDsa">DSA</label> <input id="tDsa" type="number" min="5" max="180" step="5"> min · <label for="tSql">SQL</label> <input id="tSql" type="number" min="5" max="180" step="5"> min</span>
+    </div>
+  </section>
+
+  <section class="today" id="today" aria-labelledby="todayH">
+    <div class="today-head">
+      <button class="nav" id="prevDay" type="button" aria-label="Previous day">‹</button>
+      <div><h2 id="todayH">Today</h2><div class="meta" id="todayMeta">Loading your plan…</div></div>
+      <button class="nav" id="nextDay" type="button" aria-label="Next day">›</button>
+    </div>
+
+    <div class="rows">
+      <div class="row" id="rowApps">
+        <div class="lbl"><strong>Applications<span class="ptag" id="pApp"></span></strong><span>Log each one. Any channel counts.</span></div>
+        <div class="count"><span id="cApps">0</span><small id="qApps"></small></div>
+      </div>
+      <form class="addapp" id="appForm" autocomplete="off">
+        <input id="appCompany" placeholder="Company" maxlength="80" aria-label="Company" required>
+        <input id="appRole" placeholder="Role (optional)" maxlength="80" aria-label="Role">
+        <select id="appChannel" aria-label="Where you applied"></select>
+        <button class="btn primary" id="appSubmit" type="submit">Log</button>
+      </form>
+      <div class="hint" id="appHint" aria-live="polite"></div>
+
+      <div class="row" id="rowDsa">
+        <div class="lbl"><strong>DSA problems<span class="ptag" id="pDsa"></span></strong><span>NeetCode 150, the Easy ones first. Idea in plain English → one line of code per step → rewrite it from memory. Stuck for 15 minutes → watch the solution video, then redo it yourself.</span></div>
+        <div class="stepper">
+          <button type="button" data-step="dsa" data-d="-1" aria-label="One less DSA problem">−</button>
+          <div class="count"><span id="cDsa">0</span><small id="qDsa"></small></div>
+          <button type="button" class="plus" data-step="dsa" data-d="1" aria-label="One more DSA problem">+</button>
+        </div>
+      </div>
+
+      <div class="row" id="rowSql">
+        <div class="lbl"><strong>SQL problems<span class="ptag" id="pSql"></span></strong><span>LeetCode SQL 50, in order. Never written SQL? Do the SQLBolt lessons first; each lesson counts as one.</span></div>
+        <div class="stepper">
+          <button type="button" data-step="sql" data-d="-1" aria-label="One less SQL problem">−</button>
+          <div class="count"><span id="cSql">0</span><small id="qSql"></small></div>
+          <button type="button" class="plus" data-step="sql" data-d="1" aria-label="One more SQL problem">+</button>
+        </div>
+      </div>
+
+      <div class="row" id="rowCs">
+        <div class="lbl"><strong>Fundamentals<span class="ptag" id="pCs"></span></strong><span>Alternate days: one 30-minute CS topic (OOP, DBMS, OS, networks, your main language), then one 10-question aptitude set.</span></div>
+        <div class="stepper">
+          <button type="button" data-step="cs" data-d="-1" aria-label="One less fundamentals topic">−</button>
+          <div class="count"><span id="cCs">0</span><small id="qCs"></small></div>
+          <button type="button" class="plus" data-step="cs" data-d="1" aria-label="One more fundamentals topic">+</button>
+        </div>
+      </div>
+
+      <div class="row" id="rowOut">
+        <div class="lbl"><strong>Outreach<span class="ptag" id="pOut"></span></strong><span>A referral ask, cold DM or email to a real person. Alumni from your college first.</span></div>
+        <div class="stepper">
+          <button type="button" data-step="outreach" data-d="-1" aria-label="One less outreach message">−</button>
+          <div class="count"><span id="cOut">0</span><small id="qOut"></small></div>
+          <button type="button" class="plus" data-step="outreach" data-d="1" aria-label="One more outreach message">+</button>
+        </div>
+      </div>
+
+      <div class="row" id="rowFocus">
+        <label class="check"><input type="checkbox" id="cFocus"><span class="txt"><strong>Focus block<span class="ptag" id="pFocus"></span></strong><span class="why">One milestone task, start to finish.</span></span></label>
+        <input id="focusNote" placeholder="What did you finish?" maxlength="120" aria-label="What you finished in the focus block">
+      </div>
+
+      <div class="row" id="rowOa">
+        <label class="check"><input type="checkbox" id="cOa"><span class="txt"><strong>Had an OA or interview<span class="ptag" id="pOa"></span></strong><span class="why">Counts as the focus block, keeps your streak, and it's worth more.</span></span></label>
+      </div>
+    </div>
+
+    <div class="floorbar" aria-hidden="true"><div class="fill" id="floorFill"></div></div>
+    <div class="floorline"><div class="floormsg" id="floorMsg" aria-live="polite"></div><div class="daypts" id="dayPts"></div></div>
+    <div class="nextms" id="nextMs" hidden></div>
+  </section>
+</div>
+
+<div class="page" id="page-apps" hidden>
+  <section id="apps" aria-labelledby="appsH">
+    <div class="sec-head"><h2 id="appsH">Applications</h2><div class="pipe" id="pipe"></div></div>
+    <ul class="list" id="appsList"><li class="empty">Loading applications…</li></ul>
+    <button class="linkbtn" id="appsMore" type="button" hidden></button>
+    <div class="where"><span class="muted">Where to apply:</span>
+      <a href="https://www.linkedin.com/jobs/" target="_blank" rel="noopener">LinkedIn Jobs</a>
+      <a href="https://internshala.com/internships/" target="_blank" rel="noopener">Internshala</a>
+      <a href="https://wellfound.com/jobs" target="_blank" rel="noopener">Wellfound</a>
+      <a href="https://www.naukri.com/" target="_blank" rel="noopener">Naukri</a>
+    </div>
+    <p class="note">On LinkedIn, search “intern” with your city and the Past week filter. Read the duration and start date before applying.</p>
+  </section>
+</div>
+
+<div class="page" id="page-milestones" hidden>
+  <section id="ms" aria-labelledby="msH">
+    <h2 id="msH">Milestones</h2>
+    <ul class="list" id="msList"><li class="empty">Loading milestones…</li></ul>
+    <p class="note">Blue counters fill themselves from what you log. Tick the others when they're actually done.</p>
+  </section>
+</div>
+
+<div class="page" id="page-rewards" hidden>
+  <section id="rewards" aria-labelledby="rwH">
+    <div class="sec-head"><h2 id="rwH">Rewards</h2><div class="balance">You have <b id="rBal">0</b> pts</div></div>
+    <p class="note" id="rFade"></p>
+    <div class="cart" id="cart" hidden>
+      <div class="cart-h"><strong>Cart</strong><span class="meta" id="cartSum"></span></div>
+      <ul id="cartList"></ul>
+      <div class="cart-actions"><button class="btn primary small" id="checkout" type="button">Check out</button><button class="btn small" id="cartClear" type="button">Empty the cart</button></div>
+      <div class="hint" id="cartHint" aria-live="polite"></div>
+    </div>
+    <div class="cart" id="todayClaims" hidden>
+      <div class="cart-h"><strong>Claimed today</strong><span class="meta">Buy these tomorrow. Misclicked one? Undo works until midnight.</span></div>
+      <ul id="todayList"></ul>
+    </div>
+    <ul class="list" id="rewardsList"><li class="empty">Loading rewards…</li></ul>
+    <form class="rewardform" id="rewardForm" autocomplete="off">
+      <input id="rName" placeholder="A reward you'd actually want" maxlength="80" aria-label="Reward">
+      <input id="rCost" type="number" min="1" step="1" placeholder="Pts" aria-label="Points cost">
+      <button class="btn" id="rAdd" type="submit">Add</button>
+    </form>
+    <div class="hint" id="rHint" aria-live="polite"></div>
+    <p class="note">Add treats to the cart, then check out: nothing is spent until you do. Claim tonight, buy it tomorrow. Rewards aren't one-time; claim one as often as your points allow.</p>
+    <details><summary>Claimed so far (<span id="spentTotal">0</span> pts)</summary><ul id="spendList"></ul></details>
+  </section>
+</div>
+
+<div class="page" id="page-rules" hidden>
+  <section id="how" aria-labelledby="howH">
+    <h2 id="howH">How it scores</h2>
+    <p class="note" id="howPts"></p>
+    <ol class="ramp" id="ramp"></ol>
+    <p class="note">DSA list: <a href="https://neetcode.io/practice/practice/neetcode150" target="_blank" rel="noopener">NeetCode 150</a>. SQL list: <a href="https://leetcode.com/studyplan/top-sql-50/" target="_blank" rel="noopener">LeetCode SQL 50</a>, with <a href="https://sqlbolt.com/" target="_blank" rel="noopener">SQLBolt</a> first if you've never written SQL. Fundamentals: read each topic on <a href="https://www.geeksforgeeks.org/" target="_blank" rel="noopener">GeeksforGeeks</a> (search the topic + “interview questions”); web topics on <a href="https://developer.mozilla.org/en-US/docs/Learn_web_development" target="_blank" rel="noopener">MDN</a> and <a href="https://javascript.info/" target="_blank" rel="noopener">javascript.info</a>; aptitude on <a href="https://www.indiabix.com/aptitude/questions-and-answers/" target="_blank" rel="noopener">IndiaBix</a>. Only these. Ignore the other lists. Missed a day? Points and milestones stay; only the streak resets, unless you use a freeze on that day (you get 3 days to do it). Forgot to log something? Go back with the ‹ arrow.</p>
+    <p class="note">Everything is saved on this computer in <code>data/sprint.json</code>, next to the server, with a daily copy in <code>data/backups/</code>. Your data never leaves your machine.</p>
+  </section>
+</div>
+</div>
+
+<div class="cele" id="cele" hidden>
+  <div class="cele-card" role="dialog" aria-modal="true" aria-labelledby="celeH" aria-describedby="celeTxt">
+    <div class="cele-icon" id="celeIcon" aria-hidden="true"></div>
+    <h2 class="cele-h" id="celeH"></h2>
+    <p class="cele-txt" id="celeTxt"></p>
+    <p class="cele-floor" id="celeFloor" hidden></p>
+    <p class="cele-pts" id="celePts"></p>
+    <button class="btn primary" id="celeOk" type="button">Continue</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $=function(id){return document.getElementById(id);};
+var CHANNELS=["LinkedIn","Internshala","Wellfound","Naukri","Company site","Referral","Campus","Cold email","Other"];
+var STATUSES=["Applied","OA","Interview","Offer","Rejected"];
+var STATUS_CHIP={Applied:"",OA:"acc",Interview:"warn",Offer:"good",Rejected:"bad"};
+var LEFT={apps:["application","applications"],dsa:["DSA problem","DSA problems"],sql:["SQL problem","SQL problems"],cs:["fundamentals topic","fundamentals topics"],outreach:["outreach message","outreach messages"]};
+
+/* Everything lives in D and is saved whole to data/sprint.json by the local server. */
+var D={rev:0,plan:null,days:{},apps:[],milestones:[],rewards:[],spends:[],timer:null};
+var S={loaded:false,viewDate:null,followToday:true,showAllApps:false,editingReward:null,confirm:null,cart:[],lastAct:0};
+var saveState="",saveTimer=0,saving=false,dirty=false;
+
+/* ---------- dates (YYYY-MM-DD, this computer's local day) ---------- */
+function pad(n){return String(n).padStart(2,"0");}
+function keyOf(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function todayKey(){return keyOf(new Date());}
+function toUTC(k){var p=String(k).split("-").map(Number);return Date.UTC(p[0],p[1]-1,p[2]);}
+function diffDays(a,b){return Math.round((toUTC(b)-toUTC(a))/864e5);}
+function addDays(k,n){var t=new Date(toUTC(k)+n*864e5);return t.getUTCFullYear()+"-"+pad(t.getUTCMonth()+1)+"-"+pad(t.getUTCDate());}
+var DOW=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function fmt(k){if(!k)return"";var ms=toUTC(k);if(isNaN(ms))return String(k);var t=new Date(ms);return DOW[t.getUTCDay()]+" "+t.getUTCDate()+" "+MON[t.getUTCMonth()];}
+function dm(k){var t=new Date(toUTC(k));return t.getUTCDate()+" "+MON[t.getUTCMonth()];}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+
+/* ---------- DOM helper (text only, never innerHTML) ---------- */
+function h(tag,attrs){
+  var el=document.createElement(tag);
+  if(attrs){for(var k in attrs){var v=attrs[k];if(v==null||v===false)continue;
+    if(k==="class")el.className=v;else if(k.slice(0,2)==="on")el.addEventListener(k.slice(2),v);else el.setAttribute(k,v===true?"":String(v));}}
+  for(var i=2;i<arguments.length;i++){var c=arguments[i];(Array.isArray(c)?c:[c]).forEach(function(x){
+    if(x==null||x===false||x==="")return;el.append(x instanceof Node?x:String(x));});}
+  return el;
+}
+
+/* ---------- plan + scoring ---------- */
+function weeks(){return ((D.plan&&D.plan.weeks)||[]).slice().sort(function(a,b){return a.from<b.from?-1:a.from>b.from?1:0;});}
+function weekFor(k){var w=weeks();if(!w.length)return null;var cur=w[0];w.forEach(function(x){if(x.from<=k)cur=x;});return cur;}
+/* Point values (a streak freeze is bought with points); plan.points overrides any of them. */
+function P(){return Object.assign({app:2,dsa:3,sql:3,cs:2,outreach:2,focus:5,oa:10,floor:5,freeze:30},(D.plan&&D.plan.points)||{});}
+function dayData(k){var b=D.days[k]||{};
+  return {dsa:Math.max(0,+b.dsa||0),sql:Math.max(0,+b.sql||0),cs:Math.max(0,+b.cs||0),outreach:Math.max(0,+b.outreach||0),focus:!!b.focus,oa:!!b.oa,focusNote:typeof b.focusNote==="string"?b.focusNote:"",timed:Array.isArray(b.timed)?b.timed:[]};}
+function dayRec(k){D.days[k]=dayData(k);return D.days[k];}
+function appsOn(k){var n=0;D.apps.forEach(function(a){if(a.date===k)n++;});return n;}
+function floor(k){var w=weekFor(k);if(!w)return null;var d=dayData(k),a=appsOn(k);
+  var items=[{key:"apps",have:a,need:+w.apps||0},{key:"dsa",have:d.dsa,need:+w.dsa||0},{key:"sql",have:d.sql,need:+w.sql||0},
+    {key:"cs",have:d.cs,need:+w.cs||0},{key:"outreach",have:d.outreach,need:+w.outreach||0},{key:"focus",have:(d.focus||d.oa)?1:0,need:1}]
+    .filter(function(i){return i.need>0;});
+  var done=items.filter(function(i){return i.have>=i.need;}).length;
+  return {w:w,d:d,a:a,items:items,done:done,met:done===items.length};}
+function dayPoints(k){var f=floor(k);if(!f)return 0;var p=P();
+  return f.a*p.app+f.d.dsa*p.dsa+f.d.sql*p.sql+f.d.cs*p.cs+f.d.outreach*p.outreach+(f.d.focus?p.focus:0)+(f.d.oa?p.oa:0)+(f.met?p.floor:0);}
+function activeDates(){var s=new Set(Object.keys(D.days));D.apps.forEach(function(a){if(a.date)s.add(a.date);});return Array.from(s);}
+function countTotal(key){return activeDates().reduce(function(s,k){return s+dayData(k)[key];},0);}
+function msProgress(m){if(m.auto&&m.auto.kind){var kind=m.auto.kind,have=kind==="apps"?D.apps.length:(kind==="dsa"||kind==="sql")?countTotal(kind):0,need=+m.auto.target||0;
+  return {auto:true,have:have,need:need,done:have>=need};}return {auto:false,done:!!m.done};}
+/* Unspent points fade, so they get spent instead of piling up. By default, on the morning each sprint week starts,
+   plan.decay.weeklyRate (half) of the balance carried over from earlier days (rounded down) disappears.
+   {"rate":0.25,"weeklyFrom":null} fades a quarter every morning instead; {"weeklyRate":0} turns the fade off.
+   Each day's earnings, milestones and claims land on their own date; the fade comes first. */
+function DK(){var st=(D.plan&&D.plan.start)||"";return Object.assign({from:st,rate:0,weeklyFrom:st,weeklyRate:0.5},(D.plan&&D.plan.decay)||{});}
+function weeklyFade(k){var dk=DK();return !!dk.weeklyFrom&&k>=dk.weeklyFrom;}
+function fadeRate(k){var dk=DK();if(k<dk.from)return 0;
+  if(weeklyFade(k))return sprintWeek(k).from===k?(+dk.weeklyRate||0):0;
+  return +dk.rate||0;}
+function nextFade(k){for(var d=addDays(k,1),i=0;i<14;i++,d=addDays(d,1))if(fadeRate(d)>0)return d;return null;}
+function fadeWords(r){r=+r||0;return r===0.25?"a quarter":r===0.5?"half":Math.round(r*100)+"%";}
+function fadeRule(){var dk=DK(),wk=!!dk.weeklyFrom,r=wk?+dk.weeklyRate||0:+dk.rate||0;
+  if(!(r>0))return "Unspent points don't fade.";
+  return (wk?"Once a week, on the morning a sprint week starts, ":"Every morning, ")+fadeWords(r)+" of your unspent points (rounded down) fades.";}
+function msDate(m){var pr=msProgress(m);if(!pr.done)return null;
+  if(!pr.auto)return m.doneAt||(D.plan&&D.plan.start)||todayKey();
+  var need=+m.auto.target||0,run=0,ds=activeDates().sort();
+  for(var i=0;i<ds.length;i++){run+=m.auto.kind==="apps"?appsOn(ds[i]):(+dayData(ds[i])[m.auto.kind]||0);if(run>=need)return ds[i];}
+  return todayKey();}
+function totals(){var t=todayKey(),by={},earned=0,spent=0;
+  function add(k,v){by[k]=(by[k]||0)+v;}
+  activeDates().forEach(function(k){var v=dayPoints(k);earned+=v;add(k,v);});
+  D.milestones.forEach(function(m){var k=msDate(m);if(k){var v=+m.pts||0;earned+=v;add(k,v);}});
+  D.spends.forEach(function(x){var v=+x.cost||0;spent+=v;add(x.date||t,-v);});
+  var keys=Object.keys(by).sort(),bal=0,lost=0,lostToday=0;
+  if(keys.length)for(var k=keys[0];k<=t;k=addDays(k,1)){
+    var r=fadeRate(k);if(r>0&&bal>0){var f=Math.floor(bal*r);bal-=f;lost+=f;if(k===t)lostToday=f;}
+    bal+=by[k]||0;}
+  keys.forEach(function(k){if(k>t)bal+=by[k];});
+  return {earned:earned,spent:spent,lost:lost,lostToday:lostToday,balance:bal};}
+function sprintWeek(k){var st=(D.plan&&D.plan.start)||k,i=Math.max(0,Math.floor(diffDays(st,k)/7)),from=addDays(st,i*7);return {i:i,from:from,to:addDays(from,6)};}
+function floorDaysThisWeek(){var t=todayKey(),w=sprintWeek(t),n=0;
+  for(var k=w.from;k<=t&&k<=w.to;k=addDays(k,1)){var f=floor(k);if(f&&f.met)n++;}return n;}
+
+/* Streak, Duolingo-style: a day counts with 1 DSA problem, 1 SQL problem and 1 application, or an OA/interview.
+   Freezes are spends with rewardId "freeze": bought by hand (hold at most 2), then used by hand on a missed
+   day (usedOn), up to 3 days later. A frozen day carries the streak over without adding to it. */
+var FREEZE_ID="freeze",FREEZE_MAX=2,REPAIR_DAYS=3;
+function streakNeeds(k){var d=dayData(k),n=[];if(d.oa)return n;
+  if(d.dsa<1)n.push("1 DSA problem");if(d.sql<1)n.push("1 SQL problem");if(appsOn(k)<1)n.push("1 application");return n;}
+function streakDay(k){return streakNeeds(k).length===0;}
+function freezes(){return D.spends.filter(function(s){return s.rewardId===FREEZE_ID;});}
+function streak(){var t=todayKey(),st=D.plan&&D.plan.start,fz=freezes(),used={},cur=0,best=0,lost=null;
+  fz.forEach(function(s){if(s.usedOn)used[s.usedOn]=true;});
+  if(st)for(var k=st;k<=t;k=addDays(k,1)){
+    if(streakDay(k)){cur++;if(cur>best)best=cur;}
+    else if(!used[k]&&k<t){if(cur>0)lost={day:k,len:cur};cur=0;}}
+  if(lost&&diffDays(lost.day,t)>REPAIR_DAYS)lost=null;
+  return {cur:cur,best:best,held:fz.filter(function(s){return !s.usedOn;}).length,frozen:used,lost:lost,today:streakDay(t)};}
+function useFreeze(day){var f=freezes().filter(function(s){return !s.usedOn;}).sort(function(a,b){return (a.ts||0)-(b.ts||0);})[0];
+  if(f){f.usedOn=day;changed();}}
+
+/* Legendary streak: the whole floor, with every DSA and SQL problem done on the timer in one sitting.
+   Going over still counts, but the next day's legendary floor gets one more of that kind.
+   An OA/interview day counts on its own, as in the normal streak. Freezes are automatic: start with 2, hold 2,
+   a missed day uses one while there's a streak to save, and every 5 legendary days earns one back.
+   The running timer is D.timer; finished ones are D.days[k].timed. */
+var TIMED={dsa:"DSA",sql:"SQL"},tickTimer=0,LEG_FREEZES=2,LEG_EARN=5;
+/* plan.legendary: dsaMin and sqlMin (the timer limits), from (the first legendary day, by default the sprint's start;
+   before it the timer works but nothing carries over) and an optional outreachAfter (see outreachOn). */
+function LG(){return Object.assign({dsaMin:45,sqlMin:20,from:(D.plan&&D.plan.start)||todayKey()},(D.plan&&D.plan.legendary)||{});}
+function debtFor(k){var n={dsa:0,sql:0};if(addDays(k,-1)<LG().from)return n;dayData(addDays(k,-1)).timed.forEach(function(x){if(x.over&&TIMED[x.kind])n[x.kind]++;});return n;}
+/* Optional: plan.legendary.outreachAfter is a milestone id (say, a finished LinkedIn profile). Outreach then joins the
+   legendary floor only from the day after that milestone is ticked. Without it, outreach always counts. */
+function outreachAfter(){var id=LG().outreachAfter;return id?D.milestones.find(function(x){return x.id===id;})||{id:id}:null;}
+function outreachOn(k){var m=outreachAfter();if(!m)return true;return !!(m.done&&(!m.doneAt||k>m.doneAt));}
+function legend(k){var f=floor(k);if(!f||k<LG().from)return null;var debt=debtFor(k),done={dsa:0,sql:0};
+  f.d.timed.forEach(function(x){if(!x.gaveUp&&TIMED[x.kind])done[x.kind]++;});
+  var noOut=!outreachOn(k)&&f.items.some(function(i){return i.key==="outreach";});
+  var items=f.items.filter(function(i){return i.key!=="outreach"||!noOut;})
+    .map(function(i){return TIMED[i.key]?{key:i.key,have:done[i.key],need:i.need+debt[i.key]}:i;});
+  Object.keys(TIMED).forEach(function(key){if(debt[key]&&!items.some(function(i){return i.key===key;}))items.push({key:key,have:done[key],need:debt[key]});});
+  var left=items.filter(function(i){return i.have<i.need;});
+  return {items:items,left:left,debt:debt,met:!left.length,oa:f.d.oa,noOut:noOut};}
+function legendDay(k){var l=legend(k);return !!(l&&(l.met||l.oa));}
+function legendStreak(){var t=todayKey(),cur=0,best=0,held=LEG_FREEZES,kept=0,frozen={};
+  for(var k=LG().from;k<=t;k=addDays(k,1)){
+    if(legendDay(k)){cur++;kept++;if(cur>best)best=cur;if(kept%LEG_EARN===0&&held<LEG_FREEZES)held++;}
+    else if(k<t){if(cur>0&&held>0){held--;frozen[k]=true;}else cur=0;}}
+  return {cur:cur,best:best,held:held,frozen:frozen,today:legendDay(t)};}
+function timerLeft(){var tm=D.timer;return tm?tm.start+tm.limitMin*6e4-Date.now():0;}
+function clock(ms){var s=Math.floor(Math.abs(ms)/1000);return (ms<0?"+":"")+pad(Math.floor(s/60))+":"+pad(s%60);}
+function hhmm(ms){var d=new Date(ms);return pad(d.getHours())+":"+pad(d.getMinutes());}
+function startTimer(kind){if(!S.loaded||D.timer||!TIMED[kind])return;
+  D.timer={id:uid(),kind:kind,label:$("tLabel").value.trim().slice(0,60),start:Date.now(),limitMin:Math.max(1,+LG()[kind+"Min"]||30)};
+  $("tLabel").value="";changed();}
+/* Done logs the +1 on today. Stopping inside the limit logs nothing; giving up past it logs the miss, which is tomorrow's extra. */
+function finishTimer(gaveUp){var tm=D.timer;if(!tm)return;var end=Date.now(),over=end>tm.start+tm.limitMin*6e4;
+  if(gaveUp&&!over){D.timer=null;changed();return;}
+  act(function(){var r=dayRec(todayKey());
+    r.timed=r.timed.concat([{id:tm.id,kind:tm.kind,label:tm.label||"",start:tm.start,end:end,limitMin:tm.limitMin,over:over,gaveUp:!!gaveUp}]);
+    if(!gaveUp)r[tm.kind]+=1;
+    D.timer=null;});}
+function setLimit(kind,el){var v=Math.round(+el.value);
+  if(!D.plan||!(v>=5&&v<=180)){el.value=LG()[kind+"Min"];return;}
+  if(LG()[kind+"Min"]===v)return;
+  var lg=Object.assign({},D.plan.legendary||{});lg[kind+"Min"]=v;D.plan.legendary=lg;changed();}
+
+/* ---------- loading + saving through the local server ---------- */
+function setSave(s,msg){saveState=s;var full=msg||{saving:"Saving…",saved:"Saved on this computer"}[s]||"",el=$("save");
+  el.textContent=s==="error"?"Not saved":s==="saved"?"Saved":full;el.title=full;
+  el.classList.toggle("bad",s==="error");
+  $("saveErr").hidden=s!=="error";$("saveErr").textContent=s==="error"?full:"";
+  if(s==="error")setBar(false);}
+function apply(s){s=s||{};D.rev=Number.isInteger(s.rev)?s.rev:0;D.plan=s.plan||null;D.days=s.days||{};
+  D.apps=s.apps||[];D.milestones=s.milestones||[];D.rewards=s.rewards||[];D.spends=s.spends||[];
+  D.timer=s.timer&&typeof s.timer==="object"&&TIMED[s.timer.kind]?s.timer:null;}
+async function load(){
+  try{var r=await fetch("/api/state",{cache:"no-store"});if(!r.ok)throw new Error(String(r.status));
+    apply(await r.json());S.loaded=true;setSave("saved");}
+  catch(e){setSave("error","Can't reach the tracker's local server. Start it (./launch.sh, or python3 sprint_server.py), then reload this tab.");}
+  renderAll();
+}
+function changed(){dirty=true;setSave("saving");clearTimeout(saveTimer);saveTimer=setTimeout(flush,350);renderAll();}
+async function flush(){
+  if(saving||!dirty)return;
+  saving=true;dirty=false;
+  var body=JSON.stringify(D),retry=false,conflict=false;
+  try{
+    var r=await fetch("/api/state",{method:"PUT",headers:{"Content-Type":"application/json"},body:body});
+    if(r.status===409){apply(await r.json());dirty=false;conflict=true;}
+    else if(!r.ok){throw new Error(String(r.status));}
+    else{D.rev=(await r.json()).rev;}
+  }catch(e){dirty=true;retry=true;}
+  saving=false;
+  if(retry){clearTimeout(saveTimer);saveTimer=setTimeout(flush,4000);setSave("error","Not saved yet: can't reach the local server. Retrying…");}
+  else if(conflict){setSave("error","This changed somewhere else, so the latest version was loaded. Redo your last change.");}
+  else if(dirty){flush();}
+  else{setSave("saved");}
+  renderAll();
+}
+async function refreshFromDisk(){
+  if(!S.loaded||dirty||saving)return;
+  try{var r=await fetch("/api/state",{cache:"no-store"});if(!r.ok)return;var s=await r.json();
+    if(Number.isInteger(s.rev)&&s.rev!==D.rev){apply(s);renderAll();}}catch(_){}
+}
+
+/* ---------- render ---------- */
+function renderBoard(){var t=todayKey(),p=D.plan;
+  if(p&&p.start&&p.end){var total=diffDays(p.start,p.end)+1,n=Math.min(total,Math.max(0,diffDays(p.start,t)+1)),left=Math.max(0,diffDays(t,p.end));
+    $("sDay").textContent=n;$("sDayN").textContent="of "+total+" · "+left+" days left";}
+  else{$("sDay").textContent="–";$("sDayN").textContent=S.loaded?"no plan yet":"loading";}
+  $("sPts").textContent=totals().balance;$("sApps").textContent=D.apps.length;
+  $("sWeek").textContent=floorDaysThisWeek()+"/"+((p&&p.weekTarget)||5);
+  var g=p&&typeof p.goal==="string"?p.goal:"";$("goal").hidden=!g;$("goalText").textContent=g;
+  $("subWk").textContent=(p&&p.weekTarget)||5;
+  if(p&&p.start&&p.end){$("eyebrow").textContent="Internship sprint · "+dm(p.start)+" → "+dm(p.end)+" "+p.end.slice(0,4);
+    $("title").textContent=p.title||"Offer by "+dm(p.end);}}
+
+function nextMilestone(){
+  return D.milestones.filter(function(m){return !msProgress(m).done&&!(m.auto&&m.auto.kind);})
+    .sort(function(a,b){return (a.due||"9")<(b.due||"9")?-1:(a.due||"9")>(b.due||"9")?1:0;})[0]||null;}
+
+/* Points labels next to each Today row, read from P() so they follow plan.points. */
+function renderPtags(){var p=P();
+  [["pApp",p.app," each"],["pDsa",p.dsa," each"],["pSql",p.sql," each"],["pCs",p.cs," each"],["pOut",p.outreach," each"],["pFocus",p.focus,""],["pOa",p.oa,""]]
+    .forEach(function(x){$(x[0]).textContent="+"+x[1]+" pts"+x[2];});}
+function quota(n){n=+n||0;return n>0?"/"+n:"";}
+function renderToday(){var k=S.viewDate||todayKey(),t=todayKey(),f=floor(k);
+  $("todayH").textContent=k===t?"Today":k===addDays(t,-1)?"Yesterday":fmt(k);
+  $("nextDay").disabled=k>=t;
+  $("prevDay").disabled=!!(D.plan&&D.plan.start&&k<=D.plan.start);
+  $("appSubmit").textContent=k===t?"Log":"Log for "+fmt(k);
+  if(!f){
+    $("todayMeta").textContent=S.loaded?"No plan in data/sprint.json yet. See the README.":"Loading your plan…";
+    ["cApps","cDsa","cSql","cCs","cOut"].forEach(function(id){$(id).textContent="0";});
+    ["qApps","qDsa","qSql","qCs","qOut"].forEach(function(id){$(id).textContent="";});
+    $("floorFill").style.width="0";$("floorMsg").textContent="";$("dayPts").textContent="";
+    $("today").classList.remove("met");$("nextMs").hidden=true;return;}
+  var sw=sprintWeek(k);
+  $("todayMeta").textContent=fmt(k)+" · Week "+(sw.i+1)+(f.w.label?" · "+f.w.label:"");
+  $("cApps").textContent=f.a;$("qApps").textContent=quota(f.w.apps);
+  $("cFocus").checked=f.d.focus;$("cOa").checked=f.d.oa;
+  if(document.activeElement!==$("focusNote"))$("focusNote").value=f.d.focusNote;
+  $("rowApps").classList.toggle("ok",f.a>=Math.max(1,+f.w.apps||0));
+  /* A counter with no target this week stays usable but is marked optional; the floor ignores it. */
+  [["rowDsa","dsa","cDsa","qDsa"],["rowSql","sql","cSql","qSql"],["rowCs","cs","cCs","qCs"],["rowOut","outreach","cOut","qOut"]].forEach(function(r){
+    var need=+f.w[r[1]]||0,have=f.d[r[1]];
+    $(r[2]).textContent=have;$(r[3]).textContent=quota(need);
+    $(r[0]).classList.toggle("opt",!(need>0));$(r[0]).classList.toggle("ok",have>=Math.max(1,need));});
+  $("rowFocus").classList.toggle("ok",f.d.focus||f.d.oa);
+  $("floorFill").style.width=(f.done/f.items.length*100)+"%";
+  if(f.met){$("floorMsg").textContent="Floor done. The rest of the day is yours.";}
+  else{var left=f.items.filter(function(i){return i.have<i.need;}).map(function(i){
+      if(i.key==="focus")return "the focus block";var n=i.need-i.have;return n+" "+LEFT[i.key][n===1?0:1];});
+    $("floorMsg").textContent=f.done+" of "+f.items.length+" done. Left: "+left.join(", ")+". Full floor: +"+P().floor+" bonus.";}
+  $("dayPts").textContent="+"+dayPoints(k)+" pts";
+  $("today").classList.toggle("met",f.met);
+  var nm=nextMilestone(),box=$("nextMs");
+  if(nm&&!f.d.focus&&!f.d.oa){box.replaceChildren("Focus block idea: ",h("strong",null,nm.title||""),nm.due?" · due "+fmt(nm.due):"");box.hidden=false;}
+  else box.hidden=true;
+}
+
+function appRow(a){
+  var confirming=S.confirm&&S.confirm.kind==="app"&&S.confirm.id===a.id;
+  var status=STATUSES.indexOf(a.status)>=0?a.status:"Applied";
+  var sel=h("select",{id:"st-"+a.id,"aria-label":"Status for "+(a.company||"application")});
+  STATUSES.forEach(function(s){var o=h("option",{value:s},s);if(s===status)o.selected=true;sel.append(o);});
+  sel.addEventListener("change",function(){a.status=sel.value;changed();});
+  var tail=confirming
+    ?h("span",{class:"confirm"},"Delete this entry?",
+        h("button",{class:"btn danger small",type:"button",onclick:function(){S.confirm=null;D.apps=D.apps.filter(function(x){return x.id!==a.id;});changed();}},"Delete"),
+        h("button",{class:"btn small",type:"button",onclick:function(){S.confirm=null;renderAll();}},"Keep"))
+    :h("button",{class:"iconbtn",type:"button","aria-label":"Delete "+(a.company||"entry"),onclick:function(){S.confirm={kind:"app",id:a.id};renderAll();}},"Delete");
+  return h("li",null,
+    h("div",{class:"main"},h("strong",null,a.company||"(no company)"),a.role?h("span",{class:"muted"}," · "+a.role):null,
+      h("div",{class:"meta"},[a.channel,fmt(a.date)].filter(Boolean).join(" · "))),
+    sel,tail);
+}
+function renderApps(){
+  var counts={};STATUSES.forEach(function(s){counts[s]=0;});
+  D.apps.forEach(function(a){counts[STATUSES.indexOf(a.status)>=0?a.status:"Applied"]++;});
+  $("pipe").replaceChildren.apply($("pipe"),STATUSES.map(function(s){return h("span",{class:"chip "+STATUS_CHIP[s]},s+" "+counts[s]);}));
+  var sorted=D.apps.slice().sort(function(a,b){return (b.ts||0)-(a.ts||0);}),shown=S.showAllApps?sorted:sorted.slice(0,20),ul=$("appsList");
+  if(!sorted.length)ul.replaceChildren(h("li",{class:"empty"},S.loaded?"Nothing logged yet. Log your first application on the Today page.":"Loading applications…"));
+  else ul.replaceChildren.apply(ul,shown.map(appRow));
+  $("appsMore").hidden=sorted.length<=20;
+  $("appsMore").textContent=S.showAllApps?"Show the latest 20":"Show all "+sorted.length;
+}
+
+function dueChip(m,done){
+  if(done)return h("span",{class:"chip good"},"Done");
+  if(!m.due)return null;
+  var n=diffDays(todayKey(),m.due);
+  if(n<0)return h("span",{class:"chip bad"},"Overdue "+(-n)+"d");
+  if(n===0)return h("span",{class:"chip warn"},"Due today");
+  if(n<=2)return h("span",{class:"chip warn"},"Due in "+n+"d");
+  return h("span",{class:"chip"},"Due "+fmt(m.due));
+}
+function renderMs(){
+  var ul=$("msList");
+  if(!D.milestones.length){ul.replaceChildren(h("li",{class:"empty"},S.loaded?"No milestones yet. Add them to data/sprint.json (see the README).":"Loading milestones…"));return;}
+  var list=D.milestones.map(function(m){return {m:m,pr:msProgress(m)};}).sort(function(a,b){
+    if(a.pr.done!==b.pr.done)return a.pr.done?1:-1;
+    var da=a.m.due||"9",db=b.m.due||"9";return da<db?-1:da>db?1:(a.m.order||0)-(b.m.order||0);});
+  ul.replaceChildren.apply(ul,list.map(function(x){var m=x.m,pr=x.pr,lead;
+    if(pr.auto){lead=h("span",{class:"chip acc",title:"Counts itself from what you log"},Math.min(pr.have,pr.need)+"/"+pr.need);}
+    else{lead=h("input",{type:"checkbox",id:"ms-"+m.id,"aria-label":"Done: "+(m.title||"milestone")});lead.checked=pr.done;
+      lead.addEventListener("change",function(){m.done=lead.checked;m.doneAt=lead.checked?todayKey():null;changed();});}
+    return h("li",{class:pr.done?"done":null},lead,
+      h("div",{class:"main"},h("span",{class:"t"},m.title||""),m.note?h("div",{class:"meta"},m.note):null,
+        m.prize?h("div",{class:"prize"},(pr.done?"Unlocked: ":"Prize: ")+m.prize):null),
+      dueChip(m,pr.done),h("span",{class:"pts"},"+"+(+m.pts||0)));}));
+}
+
+/* The cart: nothing is spent until Check out. guard() drops a click that comes within 600 ms of the last cart
+   action, so a double-click (or a mouse that double-fires) acts once. */
+function guard(){var n=Date.now();if(n-(S.lastAct||0)<600)return false;S.lastAct=n;return true;}
+function cartTotal(){return S.cart.reduce(function(a,c){return a+c.cost;},0);}
+function addToCart(r){if(!guard())return;S.cart.push({id:r.id,name:r.name||"",cost:+r.cost||0});$("cartHint").textContent="";renderRewards(true);}
+function checkout(){if(!S.cart.length||!guard())return;var T=totals(),sum=cartTotal();
+  if(sum>T.balance){$("cartHint").textContent="That's "+(sum-T.balance)+" pts more than you have. Take something out.";return;}
+  var t=todayKey(),now=Date.now();
+  S.cart.forEach(function(c,i){D.spends.push({id:uid(),rewardId:c.id,name:c.name,cost:c.cost,date:t,ts:now+i});});
+  S.cart=[];$("cartHint").textContent="";changed();}
+function undoClaim(id){if(!guard())return;D.spends=D.spends.filter(function(x){return x.id!==id;});changed();}
+function renderCart(T){var sum=cartTotal();$("cart").hidden=!S.cart.length;
+  $("cartList").replaceChildren.apply($("cartList"),S.cart.map(function(c,i){return h("li",null,h("span",null,c.name+" · "+c.cost+" pts"),
+    h("button",{class:"iconbtn",type:"button","aria-label":"Take "+c.name+" out of the cart",onclick:function(){if(!guard())return;S.cart.splice(i,1);renderRewards(true);}},"Remove"));}));
+  $("cartSum").textContent="Total "+sum+" of your "+T.balance+" pts";$("checkout").disabled=!S.cart.length||sum>T.balance;
+  var tk=todayKey(),mine=D.spends.filter(function(x){return x.date===tk&&x.rewardId!==FREEZE_ID;});
+  $("todayClaims").hidden=!mine.length;
+  $("todayList").replaceChildren.apply($("todayList"),mine.map(function(x){return h("li",null,h("span",null,(x.name||"")+" · "+(+x.cost||0)+" pts"),
+    h("button",{class:"iconbtn",type:"button","aria-label":"Undo "+(x.name||"claim"),onclick:function(){undoClaim(x.id);}},"Undo"));}));}
+function rewardRow(r,bal){var cost=+r.cost||0,inCart=S.cart.filter(function(c){return c.id===r.id;}).length,short=cost-(bal-cartTotal());
+  return h("li",null,
+    h("div",{class:"main"},h("strong",null,r.name||""),h("div",{class:"meta"},inCart?inCart+" in the cart":short>0?short+" pts to go":"You can afford it")),
+    h("span",{class:"pts"},cost),
+    h("button",{class:"btn primary small",type:"button",disabled:short>0,onclick:function(){addToCart(r);}},"Add to cart"),
+    h("button",{class:"iconbtn",type:"button","aria-label":"Edit "+(r.name||"reward"),onclick:function(){S.editingReward=r.id;S.confirm=null;renderRewards(true);var el=$("er-name");if(el)el.focus();}},"Edit"));
+}
+function editRow(r){
+  var name=h("input",{id:"er-name",maxlength:"80","aria-label":"Reward name"}),cost=h("input",{id:"er-cost",type:"number",min:"1",step:"1","aria-label":"Points cost"});
+  name.value=r.name||"";cost.value=String(+r.cost||0);
+  return h("li",{class:"editing"},name,cost,
+    h("button",{class:"btn primary small",type:"button",onclick:function(){var n=name.value.trim(),c=Math.round(+cost.value);
+      if(!n||!(c>0)){$("rHint").textContent="Give it a name and a cost above 0.";return;}
+      $("rHint").textContent="";S.editingReward=null;r.name=n.slice(0,80);r.cost=c;changed();}},"Save"),
+    h("button",{class:"btn danger small",type:"button",onclick:function(){S.editingReward=null;D.rewards=D.rewards.filter(function(x){return x.id!==r.id;});changed();}},"Delete"),
+    h("button",{class:"btn small",type:"button",onclick:function(){S.editingReward=null;renderAll();}},"Cancel"));
+}
+function renderRewards(force){
+  var T=totals();$("rBal").textContent=T.balance;$("spentTotal").textContent=T.spent;
+  var nf=nextFade(todayKey());
+  $("rFade").textContent=fadeRule()+(nf?" Next: "+fmt(nf)+".":"")+(T.lostToday?" This morning: −"+T.lostToday+".":"")+(T.lost?" Faded so far: "+T.lost+".":"");
+  var spends=D.spends.slice().sort(function(a,b){return (b.ts||0)-(a.ts||0);}).slice(0,15);
+  $("spendList").replaceChildren.apply($("spendList"),spends.length?spends.map(function(s){return h("li",null,fmt(s.date)+" · "+(s.name||"")+(s.usedOn?" (used on "+fmt(s.usedOn)+")":"")+" · −"+(+s.cost||0));}):[h("li",null,"Nothing claimed yet.")]);
+  renderCart(T);
+  if(S.editingReward&&!force)return;
+  var ul=$("rewardsList"),list=D.rewards.slice().sort(function(a,b){return (+a.cost||0)-(+b.cost||0);});
+  if(!list.length)ul.replaceChildren(h("li",{class:"empty"},S.loaded?"No rewards yet. Add the things you actually want below.":"Loading rewards…"));
+  else ul.replaceChildren.apply(ul,list.map(function(r){return S.editingReward===r.id?editRow(r):rewardRow(r,T.balance);}));
+}
+
+function renderHow(){var p=P();
+  var oa=outreachAfter();
+  $("howPts").textContent="Application "+p.app+" · DSA problem "+p.dsa+" · SQL problem "+p.sql+" · Fundamentals topic "+p.cs+" · Outreach "+p.outreach+" · Focus block "+p.focus+" · OA or interview "+p.oa+" · Full floor +"+p.floor+" · Milestones as listed. "+fadeRule()+" Streak: 1 DSA problem, 1 SQL problem and 1 application in a day, or an OA or interview. A freeze costs "+p.freeze+" pts and lasts until the sprint ends; you can hold "+FREEZE_MAX+". Miss a day and the streak box lets you use one on it, up to "+REPAIR_DAYS+" days later. Legendary (from "+fmt(LG().from)+"): the whole floor, with every DSA and SQL problem done on the timer in one sitting (DSA "+LG().dsaMin+" min, SQL "+LG().sqlMin+" min). Going over still counts, but the next day's legendary floor gets one more of that kind. An OA or interview day counts as legendary."+(oa?" Outreach isn't needed for it until “"+(oa.title||oa.id)+"” is ticked.":"")+" A missed day uses a legendary freeze by itself: you start with 2, hold at most 2, and earn one back every 5 legendary days. With none left, a missed day resets it.";
+  var w=weeks(),ol=$("ramp");
+  if(!w.length){ol.replaceChildren(h("li",{class:"muted"},"The weekly ramp shows up once your plan loads."));return;}
+  ol.replaceChildren.apply(ol,w.map(function(x,i){var nx=w[i+1],to=nx?addDays(nx.from,-1):(D.plan&&D.plan.end);
+    return h("li",null,h("strong",null,fmt(x.from)+(to?" – "+fmt(to):"")),(x.label?" · "+x.label:"")+": "+x.apps+" applications, "+x.dsa+" DSA, "+(+x.sql||0)+" SQL, "+(+x.cs||0)+" fundamentals, "+x.outreach+" outreach, 1 focus block a day");}));
+}
+
+function andList(a){return a.length<2?a.join(""):a.slice(0,-1).join(", ")+" and "+a[a.length-1];}
+function renderStreak(){var s=streak(),t=todayKey(),T=totals(),wk=sprintWeek(t),cost=+P().freeze||30,msg;
+  $("streak").classList.toggle("lit",S.loaded&&s.today);
+  $("sCur").textContent=S.loaded?s.cur:"–";$("sBest").textContent=s.best;$("sHeld").textContent=s.held;
+  if(!S.loaded)msg="Loading…";
+  else if(s.today)msg="Done for today. Same again tomorrow makes it "+(s.cur+1)+".";
+  else msg=(s.cur===0&&s.best>0&&!s.lost?"Back to 0. ":"")+"Left for today: "+andList(streakNeeds(t))+" (or tick an OA or interview). "+(s.cur>0?"That makes it "+(s.cur+1)+".":"That starts it.");
+  $("sMsg").textContent=msg;
+  var rp=$("repair");rp.hidden=!(S.loaded&&s.lost);
+  if(s.lost){var lost=s.lost,rk=[h("span",null,"You missed "+fmt(lost.day)+" and lost a "+lost.len+"-day streak."+(s.held>0?"":" Buy a freeze by "+fmt(addDays(lost.day,REPAIR_DAYS))+" to save it."))];
+    if(s.held>0)rk.push(h("button",{class:"btn primary small",type:"button",onclick:function(){useFreeze(lost.day);}},"Use a freeze on "+fmt(lost.day)));
+    rp.replaceChildren.apply(rp,rk);}
+  var days=[];
+  for(var k=wk.from;k<=wk.to;k=addDays(k,1)){var c,g="",what;
+    if(k>t){c="future";what="still to come";}
+    else if(streakDay(k)){c="kept";g="✓";what="kept";}
+    else if(s.frozen[k]){c="frozen";g="❄";what="freeze used";}
+    else if(k===t){c="pending";what="not yet";}
+    else{c="missed";what="missed";}
+    days.push(h("li",{class:"dot "+c+(k===t?" now":""),title:fmt(k)+": "+what},h("i",{"aria-hidden":"true"},g),
+      h("span",{"aria-hidden":"true"},DOW[new Date(toUTC(k)).getUTCDay()]),h("span",{class:"vh"},fmt(k)+": "+what)));}
+  $("week7").replaceChildren.apply($("week7"),days);
+  var box=$("freezeBox");
+  if(S.confirm&&S.confirm.kind==="freeze"){
+    box.replaceChildren("Spend "+cost+" pts on a freeze?",
+      h("button",{class:"btn primary small",type:"button",onclick:function(){S.confirm=null;
+        if(streak().held>=FREEZE_MAX||totals().balance<cost){renderAll();return;}
+        D.spends.push({id:uid(),rewardId:FREEZE_ID,name:"Streak freeze",cost:cost,date:todayKey(),ts:Date.now()});changed();}},"Buy"),
+      h("button",{class:"btn small",type:"button",onclick:function(){S.confirm=null;renderAll();}},"Not yet"));}
+  else{var full=s.held>=FREEZE_MAX,short=cost-T.balance;
+    var kids=[h("button",{class:"btn small",type:"button",disabled:!S.loaded||full||short>0,onclick:function(){S.confirm={kind:"freeze"};renderAll();}},full?"Freezes full":"Buy a freeze · "+cost+" pts")];
+    if(S.loaded&&!full&&short>0)kids.push(short+" pts to go");
+    box.replaceChildren.apply(box,kids);}
+}
+
+function renderLegend(){var t=todayKey(),ls=legendStreak(),lg=legend(t),tm=D.timer,lim=LG(),msg;
+  $("legend").classList.toggle("lit",S.loaded&&ls.today);
+  $("lCur").textContent=S.loaded?ls.cur:"–";$("lBest").textContent=ls.best;$("lHeld").textContent=ls.held;
+  if(!S.loaded)msg="Loading…";
+  else if(!lg)msg=t<lim.from?"Starts "+fmt(lim.from)+". Until then the timer works, and going over adds nothing.":"Starts once your plan loads.";
+  else if(ls.today)msg=(lg.oa&&!lg.met?"An OA or interview counts as legendary. ":"Legendary today. ")+"Same again tomorrow makes it "+(ls.cur+1)+".";
+  else{var left=lg.left.map(function(i){var n=i.need-i.have;
+      if(TIMED[i.key])return n+" timed "+TIMED[i.key]+" problem"+(n===1?"":"s");
+      if(i.key==="focus")return "the focus block";return n+" "+LEFT[i.key][n===1?0:1];});
+    var debt=Object.keys(TIMED).filter(function(k){return lg.debt[k];}).map(function(k){return lg.debt[k]+" "+TIMED[k];});
+    msg="Left for legendary: "+andList(left)+"."+(debt.length?" That includes "+andList(debt)+" extra for going over time yesterday.":"")
+      +(lg.noOut?" Outreach isn't needed until “"+(outreachAfter().title||outreachAfter().id)+"” is ticked.":"");}
+  $("lMsg").textContent=msg;
+  var wk=sprintWeek(t),days=[];
+  for(var k=wk.from;k<=wk.to;k=addDays(k,1)){var c,g="",what;
+    if(k>t){c="future";what="still to come";}
+    else if(k<lim.from){c="off";what="before it started";}
+    else if(legendDay(k)){c="kept";g="✓";what="legendary";}
+    else if(ls.frozen[k]){c="frozen";g="❄";what="freeze used";}
+    else if(k===t){c="pending";what="not yet";}
+    else{c="missed";what="not legendary";}
+    days.push(h("li",{class:"dot "+c+(k===t?" now":""),title:fmt(k)+": "+what},h("i",{"aria-hidden":"true"},g),
+      h("span",{"aria-hidden":"true"},DOW[new Date(toUTC(k)).getUTCDay()]),h("span",{class:"vh"},fmt(k)+": "+what)));}
+  $("lWeek").replaceChildren.apply($("lWeek"),days);
+  $("tIdle").hidden=!!tm;$("tRun").hidden=!tm;$("bTimer").hidden=!tm;
+  $("tStartDsa").textContent="Timed DSA · "+lim.dsaMin+" min";$("tStartSql").textContent="Timed SQL · "+lim.sqlMin+" min";
+  if(tm){var ms=timerLeft(),over=ms<0,kind=TIMED[tm.kind],btns=$("tBtns"),carry=t>=lim.from;
+    $("tRun").classList.toggle("over",over);$("tClock").textContent=clock(ms);
+    $("bClock").textContent=clock(ms);$("bTimer").classList.toggle("over",over);
+    $("tWhat").textContent=kind+(tm.label?" · "+tm.label:"");
+    $("tNote").textContent=over?"Over time. Done still counts it"+(carry?", and tomorrow's legendary floor gets 1 more "+kind+".":". Nothing carries over before "+fmt(lim.from)+".")
+      :"Started "+hhmm(tm.start)+". Finish it in this sitting: "+tm.limitMin+" min.";
+    if(S.confirm&&S.confirm.kind==="giveup")btns.replaceChildren(h("span",{class:"confirm"},
+        over?"Give up? It won't count"+(carry?", and tomorrow still gets 1 more "+kind+".":"."):"Stop the timer? Nothing gets logged.",
+        h("button",{class:"btn danger small",type:"button",onclick:function(){S.confirm=null;finishTimer(true);}},over?"Give up":"Stop"),
+        h("button",{class:"btn small",type:"button",onclick:function(){S.confirm=null;renderAll();}},"Keep going")));
+    else btns.replaceChildren(
+        h("button",{class:"btn primary",type:"button",onclick:function(){finishTimer(false);}},"Done"),
+        h("button",{class:"btn small",type:"button",onclick:function(){S.confirm={kind:"giveup"};renderAll();}},over?"Give up":"Stop"));
+    if(!tickTimer)tickTimer=setInterval(tick,1000);}
+  else if(tickTimer){clearInterval(tickTimer);tickTimer=0;}
+  document.title=tm?"⏱ "+clock(timerLeft())+" · Internship Sprint":"Internship Sprint";
+  var list=dayData(t).timed,ul=$("timedList");ul.hidden=!list.length;
+  ul.replaceChildren.apply(ul,list.map(function(x){var mins=Math.max(1,Math.round((x.end-x.start)/6e4)),st=x.gaveUp?"bad":x.over?"warn":"good";
+    return h("li",null,h("span",{class:"chip "+st},x.gaveUp?"Gave up":x.over?"Over time":"On time"),
+      h("span",{class:"main"},(TIMED[x.kind]||x.kind)+(x.label?" · "+x.label:"")),h("span",{class:"muted"},mins+" of "+x.limitMin+" min"));}));
+  if(document.activeElement!==$("tDsa"))$("tDsa").value=lim.dsaMin;
+  if(document.activeElement!==$("tSql"))$("tSql").value=lim.sqlMin;
+}
+/* Once a second while a timer runs: the clock and the tab title (visible from the NeetCode tab). */
+function tick(){if(!D.timer){clearInterval(tickTimer);tickTimer=0;document.title="Internship Sprint";return;}
+  var ms=timerLeft();$("tClock").textContent=clock(ms);document.title="⏱ "+clock(ms)+" · Internship Sprint";
+  $("bClock").textContent=clock(ms);$("bTimer").classList.toggle("over",ms<0);
+  if((ms<0)!==$("tRun").classList.contains("over"))renderLegend();}
+
+/* The Duolingo moment: shown when today's first coding problem extends the streak, or the floor completes. */
+var MILE={7:"One full week. ",14:"Two weeks. ",21:"Three weeks. ",30:"A month. ",45:"45 days. ",60:"Two months. "},celeBack=null;
+function celebrate(sNew,fNew,lNew){var s=streak(),T=totals(),p=P(),ls=legendStreak();
+  var treat=D.rewards.filter(function(r){return (+r.cost||0)<=T.balance;}).sort(function(a,b){return (+b.cost||0)-(+a.cost||0);})[0];
+  $("celeIcon").textContent=lNew?"👑":sNew?"🔥":"⭐";
+  $("celeH").textContent=lNew?ls.cur+"-day legendary":sNew?s.cur+"-day streak":"Floor done";
+  $("celeH").classList.toggle("floor",!sNew&&!lNew);$("celeH").classList.toggle("legend",!!lNew);
+  $("celeTxt").textContent=lNew?"The whole floor, every problem on the clock. Same again tomorrow makes it "+(ls.cur+1)+"."+(sNew?" Streak: "+s.cur+" days.":"")
+    :sNew?(s.cur===1?"Streak started. Same again tomorrow makes it 2.":(MILE[s.cur]||"")+"Streak extended. Same again tomorrow makes it "+(s.cur+1)+".")
+    :"+"+p.floor+" bonus points. The rest of the day is yours.";
+  $("celeFloor").hidden=!(fNew&&(sNew||lNew));$("celeFloor").textContent="Floor done too: +"+p.floor+" bonus points.";
+  $("celePts").textContent="Today +"+dayPoints(todayKey())+" pts. You have "+T.balance+(treat?", enough for “"+treat.name+"”.":".");
+  if($("cele").hidden)celeBack=document.activeElement;
+  $("cele").hidden=false;$("celeOk").focus();}
+function closeCele(){$("cele").hidden=true;if(celeBack&&document.contains(celeBack))celeBack.focus();celeBack=null;}
+
+/* The bar: both streaks, a badge per page, and the running timer, so they're visible from any page. */
+function barStat(id,icon,n,label,cls){var el=$(id);el.className=cls||"";el.title=n+label;
+  el.replaceChildren(h("span",{"aria-hidden":"true"},icon+" "),String(n),h("span",{class:"vh"},label));}
+function badge(pg,text,cls,label){var el=$("tb-"+pg);el.textContent=text;el.className="tb"+(text&&cls?" "+cls:"");el.title=text?label:"";}
+function renderBar(){var t=todayKey(),f=floor(t),s=streak(),ls=legendStreak(),on=S.loaded;
+  barStat("bS","🔥",on?s.cur:"–"," day streak",on&&s.today?"lit-s":"");
+  barStat("bL","👑",on?ls.cur:"–"," day legendary streak",on&&ls.today?"lit-l":"");
+  badge("today",on&&f?(f.met?"✓":f.done+"/"+f.items.length):"",f&&f.met?"good":"",f?(f.met?"Floor done":f.done+" of "+f.items.length+" floor items done"):"");
+  badge("apps",D.apps.length?String(D.apps.length):"","",D.apps.length+" applications logged");
+  var late=D.milestones.filter(function(m){return m.due&&m.due<t&&!msProgress(m).done;}).length;
+  badge("milestones",late?String(late):"","bad",late+" overdue");
+  var bal=totals().balance;badge("rewards",on?String(bal):"","",bal+" points to spend");}
+
+function renderAll(){
+  var off=!S.loaded;
+  ["appCompany","appRole","appChannel","appSubmit","cFocus","cOa","focusNote","rName","rCost","rAdd","tLabel","tStartDsa","tStartSql","tDsa","tSql"].forEach(function(id){$(id).disabled=off;});
+  document.querySelectorAll("[data-step]").forEach(function(b){b.disabled=off;});
+  renderBoard();renderStreak();renderLegend();renderToday();renderPtags();renderApps();renderMs();renderRewards();renderHow();renderBar();
+}
+
+/* ---------- events ---------- */
+/* Runs a change; on today's view, celebrates when it starts today's streak day, completes the floor or makes the day legendary. */
+function act(fn){var t=todayKey(),on=S.viewDate===t,f0=on?floor(t):null,s0=on&&streakDay(t),m0=!!(f0&&f0.met),l0=on&&legendDay(t);
+  if(fn()===false)return;changed();if(!on)return;
+  var f1=floor(t),sN=!s0&&streakDay(t),fN=!m0&&!!(f1&&f1.met),lN=!l0&&legendDay(t);
+  if(sN||fN||lN)celebrate(sN,fN,lN);}
+document.querySelectorAll("[data-step]").forEach(function(b){b.addEventListener("click",function(){act(function(){
+  var r=dayRec(S.viewDate),f=b.getAttribute("data-step"),n=Math.max(0,r[f]+(+b.getAttribute("data-d")));
+  if(n===r[f])return false;r[f]=n;});});});
+$("cFocus").addEventListener("change",function(e){act(function(){dayRec(S.viewDate).focus=e.target.checked;});});
+$("cOa").addEventListener("change",function(e){act(function(){dayRec(S.viewDate).oa=e.target.checked;});});
+$("tStartDsa").addEventListener("click",function(){startTimer("dsa");});
+$("tStartSql").addEventListener("click",function(){startTimer("sql");});
+$("tDsa").addEventListener("change",function(e){setLimit("dsa",e.target);});
+$("tSql").addEventListener("change",function(e){setLimit("sql",e.target);});
+$("celeOk").addEventListener("click",closeCele);
+$("cele").addEventListener("click",function(e){if(e.target===$("cele"))closeCele();});
+document.addEventListener("keydown",function(e){if($("cele").hidden)return;
+  if(e.key==="Escape"){e.preventDefault();closeCele();}else if(e.key==="Tab"){e.preventDefault();$("celeOk").focus();}});
+$("focusNote").addEventListener("input",function(e){dayRec(S.viewDate).focusNote=e.target.value.slice(0,120);changed();});
+$("prevDay").addEventListener("click",function(){S.viewDate=addDays(S.viewDate,-1);S.followToday=false;S.confirm=null;renderAll();});
+$("nextDay").addEventListener("click",function(){var t=todayKey();if(S.viewDate<t){S.viewDate=addDays(S.viewDate,1);S.followToday=S.viewDate===t;renderAll();}});
+function dupHint(){var v=$("appCompany").value.trim().toLowerCase();
+  var hit=v&&D.apps.find(function(a){return (a.company||"").trim().toLowerCase()===v;});
+  $("appHint").textContent=hit?"Already logged "+hit.company+" on "+fmt(hit.date)+" ("+(hit.status||"Applied")+").":"";}
+$("appCompany").addEventListener("input",dupHint);
+$("appForm").addEventListener("submit",function(e){e.preventDefault();
+  if(!S.loaded)return;
+  var company=$("appCompany").value.trim();if(!company)return;
+  var ch=$("appChannel").value,entry={id:uid(),company:company.slice(0,80),role:$("appRole").value.trim().slice(0,80),channel:ch,status:"Applied",date:S.viewDate,ts:Date.now()};
+  try{localStorage.setItem("sprint.channel",ch);}catch(_){}
+  $("appCompany").value="";$("appRole").value="";$("appHint").textContent="";$("appCompany").focus();
+  act(function(){D.apps.push(entry);});
+});
+$("appsMore").addEventListener("click",function(){S.showAllApps=!S.showAllApps;renderApps();});
+$("rewardForm").addEventListener("submit",function(e){e.preventDefault();
+  if(!S.loaded)return;
+  var n=$("rName").value.trim(),c=Math.round(+$("rCost").value);
+  if(!n||!(c>0)){$("rHint").textContent="Give it a name and a cost above 0.";return;}
+  $("rHint").textContent="";$("rName").value="";$("rCost").value="";
+  D.rewards.push({id:uid(),name:n.slice(0,80),cost:c,order:Date.now()});changed();
+});
+function onReturn(){if(S.followToday&&S.viewDate!==todayKey()){S.viewDate=todayKey();renderAll();}refreshFromDisk();}
+document.addEventListener("visibilitychange",function(){if(!document.hidden)onReturn();});
+window.addEventListener("focus",onReturn);
+window.addEventListener("beforeunload",function(e){if(dirty||saving){e.preventDefault();e.returnValue="";}});
+
+/* ---------- pages + top bar ---------- */
+/* Hashes start with "/" so they never match an element id (the browser would jump to it). */
+var PAGES=["today","apps","milestones","rewards","rules"],page="today",barHidden=false,lastY=0;
+function pageFromHash(){var p=String(location.hash||"").replace(/^#\/?/,"");return PAGES.indexOf(p)>=0?p:"today";}
+function showPage(toTop){page=pageFromHash();
+  PAGES.forEach(function(p){$("page-"+p).hidden=p!==page;});
+  document.querySelectorAll(".tab[data-page]").forEach(function(a){
+    if(a.getAttribute("data-page")===page)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current");});
+  setBar(false);if(toTop)window.scrollTo(0,0);}
+function setBar(hide){if(hide===barHidden)return;barHidden=hide;$("bar").classList.toggle("hide",hide);}
+/* Down past the first 80px hides it, any scroll up shows it. It stays while there's a save error or keyboard focus in it. */
+function onScroll(){var y=Math.max(0,window.scrollY),dy=y-lastY,f=document.activeElement;
+  $("bar").classList.toggle("scrolled",y>4);
+  if(Math.abs(dy)<8)return;
+  lastY=y;
+  var keep=dy<0||y<80||saveState==="error"||!!(f&&$("bar").contains(f)&&f.matches(":focus-visible"));
+  setBar(!keep);}
+window.addEventListener("scroll",onScroll,{passive:true});
+window.addEventListener("hashchange",function(){showPage(true);});
+$("bar").addEventListener("focusin",function(){setBar(false);});
+
+$("checkout").addEventListener("click",checkout);
+$("cartClear").addEventListener("click",function(){if(!guard())return;S.cart=[];$("cartHint").textContent="";renderRewards(true);});
+
+/* ---------- start ---------- */
+S.viewDate=todayKey();
+showPage(false);
+var sel=$("appChannel");CHANNELS.forEach(function(c){sel.append(h("option",{value:c},c));});
+try{var last=localStorage.getItem("sprint.channel");if(last&&CHANNELS.indexOf(last)>=0)sel.value=last;}catch(_){}
+renderAll();
+load();
+})();
+</script>
+</body>
+</html>

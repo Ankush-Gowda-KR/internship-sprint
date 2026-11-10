@@ -1,0 +1,4 @@
+# Your own data: entries, backups, history and logs. Never commit it.
+data/
+__pycache__/
+*.pyc

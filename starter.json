@@ -1,0 +1,37 @@
+{
+  "plan": {
+    "days": 61,
+    "goal": "Signed internship offer → buy yourself the thing you've wanted for ages",
+    "weekTarget": 5,
+    "points": {"app": 2, "dsa": 3, "sql": 3, "cs": 2, "outreach": 2, "focus": 5, "oa": 10, "floor": 5, "freeze": 30},
+    "legendary": {"dsaMin": 45, "sqlMin": 20},
+    "decay": {"weeklyRate": 0.5},
+    "weeks": [
+      {"from": 0, "label": "Warm-up", "apps": 3, "dsa": 1, "sql": 1, "cs": 0, "outreach": 1},
+      {"from": 7, "label": "Build", "apps": 4, "dsa": 2, "sql": 2, "cs": 1, "outreach": 2},
+      {"from": 14, "label": "Push", "apps": 5, "dsa": 3, "sql": 2, "cs": 1, "outreach": 2},
+      {"from": 21, "label": "Full speed", "apps": 6, "dsa": 3, "sql": 2, "cs": 1, "outreach": 3}
+    ]
+  },
+  "milestones": [
+    {"id": "m01", "order": 1, "due": 2, "pts": 15, "title": "Resume: one page, read by someone else, every line true"},
+    {"id": "m02", "order": 2, "due": 5, "pts": 15, "title": "LinkedIn: headline, About, experience, projects, skills, Open to Work"},
+    {"id": "m03", "order": 3, "due": 9, "pts": 15, "title": "GitHub: profile README and 2 pinned projects, each with a README"},
+    {"id": "m04", "order": 4, "due": 9, "pts": 20, "title": "25 applications sent", "auto": {"kind": "apps", "target": 25}},
+    {"id": "m05", "order": 5, "due": 12, "pts": 20, "title": "Explain every resume project out loud, 2 minutes each"},
+    {"id": "m06", "order": 6, "due": 14, "pts": 20, "title": "First mock interview, 30 minutes"},
+    {"id": "m07", "order": 7, "due": 23, "pts": 40, "title": "40 DSA problems solved", "auto": {"kind": "dsa", "target": 40}},
+    {"id": "m08", "order": 8, "due": 26, "pts": 40, "title": "80 applications sent", "auto": {"kind": "apps", "target": 80}},
+    {"id": "m09", "order": 9, "due": 44, "pts": 40, "title": "LeetCode SQL 50 done", "auto": {"kind": "sql", "target": 50}},
+    {"id": "m10", "order": 10, "due": 44, "pts": 50, "title": "150 applications sent", "auto": {"kind": "apps", "target": 150}},
+    {"id": "m11", "order": 11, "due": 60, "pts": 100, "title": "NeetCode 150 finished", "auto": {"kind": "dsa", "target": 150}},
+    {"id": "m12", "order": 12, "due": 60, "pts": 500, "title": "Signed internship offer", "prize": "The big prize: see the goal at the top"}
+  ],
+  "rewards": [
+    {"id": "r-snack", "order": 1, "name": "A snack you like", "cost": 15},
+    {"id": "r-episode", "order": 2, "name": "One episode of a show, guilt-free", "cost": 25},
+    {"id": "r-drink", "order": 3, "name": "A fancy drink", "cost": 35},
+    {"id": "r-meal", "order": 4, "name": "Order in a meal", "cost": 90},
+    {"id": "r-dayoff", "order": 5, "name": "Full day off, zero guilt", "cost": 100}
+  ]
+}
